@@ -5,6 +5,6 @@
 
 AGameModeBase_Caine::AGameModeBase_Caine()
 {
-	ConstructorHelpers::FClassFinder<APawn>MainCharacterCaine(TEXT("/Game/BP/BP_CharacterCaine"));
+	ConstructorHelpers::FClassFinder<APawn>MainCharacterCaine(TEXT("/Game/Caine/BP/BP_CharacterCaine"));
 	DefaultPawnClass = MainCharacterCaine.Class;
 }
