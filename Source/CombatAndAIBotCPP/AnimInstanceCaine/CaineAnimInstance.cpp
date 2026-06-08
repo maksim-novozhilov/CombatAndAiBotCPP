@@ -35,6 +35,8 @@ void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	else if (SpeedXY < CharacterSprintSpeed - 10.0f && CurrentAcceleration > 0.0f)
 	{
 		
+		bCanIdleAfterRun = false;
+		
 		if (bWasSprintingLastFrame)
 		{
 			SprintResetDelayTimer -= DeltaSeconds;
@@ -42,7 +44,7 @@ void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			
 			if (SprintResetDelayTimer <= 0.0f)
 			{
-				bCanIdleAfterRun = false; 
+				
 				bWasSprintingLastFrame = false;
 			}
 		}

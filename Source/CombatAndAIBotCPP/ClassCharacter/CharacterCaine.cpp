@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ACharacterCaine::ACharacterCaine()
@@ -16,6 +17,7 @@ ACharacterCaine::ACharacterCaine()
 
 }
 
+
 // Called when the game starts or when spawned
 void ACharacterCaine::BeginPlay()
 {
@@ -24,6 +26,16 @@ void ACharacterCaine::BeginPlay()
 	SetupInputMappingContext();
 	
 	GetCharacterMovement()->MaxWalkSpeed = DefaultSpeed;
+
+	///////////////// Подключение Start and End OVERLAP
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACharacterCaine::OnWeaponOverlapStart);
+		GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ACharacterCaine::OnWeaponOverlapEnd);
+	}
+
+	//Создаем 4 пустые ячейки в инвенторе
+	WeaponInventory.Init(nullptr, 4);
 }
 
 // Called every frame
@@ -68,6 +80,12 @@ void ACharacterCaine::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		//Sprint
 		EnhancedInputComponent->BindAction(IA_Sprint, ETriggerEvent::Started, this, &ACharacterCaine::SprintStart);
 		EnhancedInputComponent->BindAction(IA_Sprint, ETriggerEvent::Completed, this, &ACharacterCaine::SprintStop);
+
+		//Interact
+		EnhancedInputComponent->BindAction(IA_Interact, ETriggerEvent::Started, this, &ACharacterCaine::Interact);
+
+		//Sheathe_Unsheathe
+		EnhancedInputComponent->BindAction(IA_Sheathe_Unsheathe, ETriggerEvent::Started, this, &ACharacterCaine::Sheathe_Unsheathe);
 	}
 }
 
@@ -155,3 +173,102 @@ void ACharacterCaine::Roll()
 {
 
 }
+
+void ACharacterCaine::Interact()
+{
+	if (DetectedActor && !WeaponInHand)
+	{
+		WeaponInHand = DetectedActor;
+
+		IInterface_Character_Weapon::Execute_FlyToHand(WeaponInHand, GetMesh());
+		
+		
+	}
+
+	else if (!DetectedActor && WeaponInHand)
+	{
+		
+		IInterface_Character_Weapon::Execute_DropWeapon(WeaponInHand, GetMesh());
+		
+
+	}
+}
+		
+
+
+void ACharacterCaine::CLearWeaponInHand_Drop_Implementation()
+{
+	WeaponInHand = nullptr;
+
+}
+
+	
+
+
+void ACharacterCaine::Sheathe_Unsheathe()
+{
+	
+	if (WeaponInHand)
+	{
+		
+		IInterface_Character_Weapon::Execute_PlayMontagesSword_Sheathe(WeaponInHand, GetMesh());
+	}
+		
+
+	else
+	{
+		IInterface_Character_Weapon::Execute_PlayMontagesSword_Unsheathe(EquippedWeaponInHips, GetMesh());
+	}
+		
+}
+		
+		
+void ACharacterCaine::SwapWeaponSlots_Implementation()
+{
+	
+	if (WeaponInHand)
+	{
+		EquippedWeaponInHips = WeaponInHand;
+		WeaponInHand = nullptr;
+	}
+	
+	else if (EquippedWeaponInHips)
+	{
+		WeaponInHand = EquippedWeaponInHips;
+		EquippedWeaponInHips = nullptr;
+	}
+}
+
+
+
+//-------------------OVERLAPS------------------------------------------------------------------------------------------------------------------------
+void ACharacterCaine::OnWeaponOverlapStart(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor != this)
+	{
+		if (OtherActor->Implements<UInterface_Character_Weapon>())
+		{
+		
+			DetectedActor = OtherActor;
+
+		}
+		
+	}
+
+}
+			
+
+	
+
+void ACharacterCaine::OnWeaponOverlapEnd(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && DetectedActor == OtherActor)
+	{
+		DetectedActor = nullptr;
+	}
+}
+
+	
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+
+		
