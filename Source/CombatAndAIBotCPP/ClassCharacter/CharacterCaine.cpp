@@ -86,6 +86,9 @@ void ACharacterCaine::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 		//Sheathe_Unsheathe
 		EnhancedInputComponent->BindAction(IA_Sheathe_Unsheathe, ETriggerEvent::Started, this, &ACharacterCaine::Sheathe_Unsheathe);
+
+		//LBM
+		EnhancedInputComponent->BindAction(IA_LBM, ETriggerEvent::Started, this, &ACharacterCaine::LBM);
 	}
 }
 
@@ -174,6 +177,19 @@ void ACharacterCaine::Roll()
 
 }
 
+void ACharacterCaine::LBM()
+{
+	if (WeaponInHand)
+	{
+		IInterface_Character_Weapon::Execute_Attack(WeaponInHand);
+	}
+
+	else if (!WeaponInHand && EquippedWeaponInHips)
+	{
+		Sheathe_Unsheathe();
+	}
+}
+
 void ACharacterCaine::Interact()
 {
 	if (DetectedActor && !WeaponInHand)
@@ -221,6 +237,7 @@ void ACharacterCaine::Sheathe_Unsheathe()
 	}
 		
 }
+
 		
 		
 void ACharacterCaine::SwapWeaponSlots_Implementation()

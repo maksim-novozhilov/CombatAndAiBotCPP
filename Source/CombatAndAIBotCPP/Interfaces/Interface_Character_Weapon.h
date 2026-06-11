@@ -34,8 +34,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void CLearWeaponInHand_Drop();
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void Attack();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void CanNextAttack(bool bSwitchCanNextAttack);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void ResetIsAttaking();
 
 	
+	//----------------INTERACT-----------------------------------------------------------------------------------------------------------------------
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void PlayMontagesSword_Sheathe(USkeletalMeshComponent* MeshCaine);
@@ -52,3 +61,5 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void SwapWeaponSlots();
 };
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------

@@ -60,11 +60,14 @@ protected:
 	virtual void PlayMontagesSword_Sheathe_Implementation(USkeletalMeshComponent* MeshCaine) override;//функция для проигрываня монтажей Sheathe меча
 	virtual void PlayMontagesSword_Unsheathe_Implementation(USkeletalMeshComponent* MeshCaine) override;//функция для проигрываня монтажей Unsheathe меча
 	virtual void AttachWeaponToHips_Implementation() override;//Функция, которая приклепляет меч к поясу
-	virtual void DetachWeaponToHips_Implementation() override;//функция, которая открепляет меч от пояся
+	virtual void DetachWeaponToHips_Implementation() override;//функция, которая открепляет меч от пояса
+	virtual void Attack_Implementation() override;//Функция атаки лкм
+	virtual void CanNextAttack_Implementation(bool bSwitchCanNextAttack) override;//Функция, которая разрешает запустить некст атаку
+	virtual void ResetIsAttaking_Implementation() override;//Функция сбрасывает переменную bIsAttaking, если игрок не успел нажать слудующий удар
 
 protected:
 
-	//Сюда сохраняем меш персонажа (для полета оружия в сокет на руке)
+	//Сюда сохраняем меш персонажа (для полета оружия в сокет на руке или для вызова аним инстанс)
 	UPROPERTY(BlueprintReadOnly, Category = "WeaponSetings")
 	class USkeletalMeshComponent* GetCharacterMesh;
 	
@@ -87,6 +90,22 @@ protected:
 	// Эвент, который запустит таймер
 	UFUNCTION()
 	void FlyWeaponTick();
+
+protected:
+	//Переменная, персонаж в процессе атаки
+	UPROPERTY()
+	bool bIsAttaking = false;
+	//Переменная, которая разрешает нект атаку из массива
+	UPROPERTY()
+	bool bCanNextAttack = false;
+	//Переменная, хранит текущий индекс атаки
+	UPROPERTY()
+	int AttackIndex = 0;
+	//Переменная, сбрасывает тикущий индекс, если индекс атаки больше длинны массива (настраивается в бп оружия)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponSetings")
+	int ResetAttackIndex;
+
+
 	
 	
 

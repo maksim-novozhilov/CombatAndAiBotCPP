@@ -53,6 +53,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* IA_Sheathe_Unsheathe;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* IA_LBM;
 
 	void MoveForward(const struct FInputActionValue& Value);
 	void MoveRight(const struct FInputActionValue& Value);
@@ -63,6 +65,7 @@ public:
 	void Roll();
 	void Interact();
 	void Sheathe_Unsheathe();
+	void LBM();
 
 protected: //Функции из интерфейса Interface_Character_Weapon
 	

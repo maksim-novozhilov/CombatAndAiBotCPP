@@ -123,6 +123,8 @@ void AClassWeaponBase::DropWeapon_Implementation(USkeletalMeshComponent* MeshCai
 			UAnimInstance* AnimInstance = GetCharacterMesh->GetAnimInstance();
 
 			AnimInstance->Montage_Play(DropWeaponMontage, 1.f);
+
+			ResetIsAttaking_Implementation();
 		}
 	}
 }
@@ -179,6 +181,9 @@ void AClassWeaponBase::PlayMontagesSword_Sheathe_Implementation(USkeletalMeshCom
 		UAnimInstance* AnimInstance = GetCharacterMesh->GetAnimInstance();
 
 		AnimInstance->Montage_Play(SheatheWeaponMontage, 1.f);
+
+		ResetIsAttaking_Implementation();
+
 		
 	}
 }
@@ -204,7 +209,11 @@ void AClassWeaponBase::AttachWeaponToHips_Implementation()
 		FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
 		this->AttachToComponent(GetCharacterMesh, AttachRules, HipsSocketSword);
 
+		
 		GetCharacterMesh = nullptr;
+
+		
+		
 	}
 }
 
@@ -220,6 +229,62 @@ void AClassWeaponBase::DetachWeaponToHips_Implementation()
 	}
 }
 
+
+//-----------------------ATTACK----------------------------------------------------------------------------------------------------------------------
+
+void AClassWeaponBase::Attack_Implementation()
+{
+	if (GetCharacterMesh)
+	{
+		UAnimInstance* AnimInstance = GetCharacterMesh->GetAnimInstance();
+
+		if (!bIsAttaking)
+		{
+
+			bIsAttaking = true;
+			AttackIndex = 0;
+
+			AnimInstance->Montage_Play(AttackMontages[AttackIndex], 1.f);
+
+			AttackIndex++;
+			return;
+
+		}
+
+		if (bIsAttaking && bCanNextAttack)
+		{
+			
+			if (AttackIndex >= AttackMontages.Num())
+			{
+				AttackIndex = ResetAttackIndex;
+			}
+			
+			AnimInstance->Montage_Play(AttackMontages[AttackIndex], 1.f);
+			
+			AttackIndex++;
+			bCanNextAttack = false;
+				
+		}
+
+	}
+}
+
+
+void AClassWeaponBase::CanNextAttack_Implementation(bool bSwitchCanNextAttack)
+{
+	bCanNextAttack = bSwitchCanNextAttack;
+}
+
+void AClassWeaponBase::ResetIsAttaking_Implementation()
+{
+	bIsAttaking = false;
+
+	AttackIndex = 0;
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+
+	
 
 			
 
