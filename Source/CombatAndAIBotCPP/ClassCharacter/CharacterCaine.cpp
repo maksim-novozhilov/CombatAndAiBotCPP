@@ -36,12 +36,16 @@ void ACharacterCaine::BeginPlay()
 
 	//Создаем 4 пустые ячейки в инвенторе
 	WeaponInventory.Init(nullptr, 4);
+
+	SwitcherCharacterMode();
 }
 
 // Called every frame
 void ACharacterCaine::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	SwitcherCharacterMode();
 
 }
 
@@ -110,9 +114,10 @@ void ACharacterCaine::MoveForward(const FInputActionValue& Value)
 
 		
 		AddMovementInput(ForwardDirection, MovementValue);
-
-		
 	}
+
+	
+		
 }
 
 void ACharacterCaine::MoveRight(const FInputActionValue & Value)
@@ -132,6 +137,8 @@ void ACharacterCaine::MoveRight(const FInputActionValue & Value)
 		
 		AddMovementInput(RightDirection, MovementValue);
 	}
+
+	
 }
 
 void ACharacterCaine::Turn(const FInputActionValue & Value)
@@ -144,6 +151,8 @@ void ACharacterCaine::Turn(const FInputActionValue & Value)
 		
 		AddControllerYawInput(LookValue);
 	}
+
+	
 }
 
 
@@ -157,6 +166,8 @@ void ACharacterCaine::LookUp(const FInputActionValue & Value)
 		
 		AddControllerPitchInput(LookValue);
 	}
+
+	
 }
 
 
@@ -192,13 +203,14 @@ void ACharacterCaine::LBM()
 
 void ACharacterCaine::Interact()
 {
+	
 	if (DetectedActor && !WeaponInHand)
 	{
 		WeaponInHand = DetectedActor;
 
 		IInterface_Character_Weapon::Execute_FlyToHand(WeaponInHand, GetMesh());
 		
-		
+		SwitcherCharacterMode();
 	}
 
 	else if (!DetectedActor && WeaponInHand)
@@ -206,7 +218,7 @@ void ACharacterCaine::Interact()
 		
 		IInterface_Character_Weapon::Execute_DropWeapon(WeaponInHand, GetMesh());
 		
-
+		//SwitcherCharacterMode();
 	}
 }
 		
@@ -215,6 +227,8 @@ void ACharacterCaine::Interact()
 void ACharacterCaine::CLearWeaponInHand_Drop_Implementation()
 {
 	WeaponInHand = nullptr;
+
+	SwitcherCharacterMode();
 
 }
 
@@ -254,9 +268,39 @@ void ACharacterCaine::SwapWeaponSlots_Implementation()
 		WeaponInHand = EquippedWeaponInHips;
 		EquippedWeaponInHips = nullptr;
 	}
+
+	SwitcherCharacterMode();
 }
 
 
+void ACharacterCaine::SwitcherCharacterMode()
+{
+	float CurrentSpeedXY = GetVelocity().Size2D();
+	
+	if (WeaponInHand && CurrentSpeedXY >= 10.f && CurrentSpeedXY < (SprintSpeed-10.f))
+	{
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+
+	else if (WeaponInHand && CurrentSpeedXY < 10.f)
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
+	
+	else if (WeaponInHand && CurrentSpeedXY >= (SprintSpeed-10.f))
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
+	
+	else if (!WeaponInHand)
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
+}
 
 //-------------------OVERLAPS------------------------------------------------------------------------------------------------------------------------
 void ACharacterCaine::OnWeaponOverlapStart(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -284,6 +328,7 @@ void ACharacterCaine::OnWeaponOverlapEnd(UPrimitiveComponent * OverlappedCompone
 		DetectedActor = nullptr;
 	}
 }
+
 
 	
 //---------------------------------------------------------------------------------------------------------------------------------------------------

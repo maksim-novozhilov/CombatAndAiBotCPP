@@ -19,13 +19,25 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	class ACharacter* CaineCharacter;
+protected:
+	
+	class ACharacterCaine* CaineCharacter;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SpeedXY")
 	float SpeedXY;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SpeedXY")
+	float DirectionXY;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "bHasWeapon")
+	bool bHasWeapon;
+
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "bIsFalling")
 	bool bIsFalling;
+
+	UFUNCTION()
+	void IdleAfterRun();
 
 	//Переменная для разрешения перехода к состоянию айдл после бега
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "bCanIdleAfterRun")
@@ -45,8 +57,10 @@ private:
 
 	float SprintResetDelayTimer = 0.0f;
 
+	float CharacterSprintSpeed = 470.0f;
 
+	class UCharacterMovementComponent* MoveComp;
 
-
+	float DeltaTime;
 	
 };

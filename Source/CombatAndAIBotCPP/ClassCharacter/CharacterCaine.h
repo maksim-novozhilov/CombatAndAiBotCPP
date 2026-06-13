@@ -97,16 +97,19 @@ protected:
 	void OnWeaponOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	//Переменная хранит в себе актора, которого задетектил персонаж
+	//Переменная, хранит в себе актора, которого задетектил персонаж
 	UPROPERTY()
 	AActor* DetectedActor;
 
-	//Переменная хранит в себе актора, которого подобрал персонаж и сейчас имеет в себе (в руках)
+	//Переменная, хранит в себе актора, которого подобрал персонаж и сейчас имеет в себе (в руках)
 	UPROPERTY()
 	AActor* WeaponInHand;
-
+	//Переменная, хранит в себе оружие на поясе
 	UPROPERTY()
 	AActor* EquippedWeaponInHips;
+	//Функция, переключает режим персонажа с не боевгого в боевой
+	UFUNCTION()
+	void SwitcherCharacterMode();
 
 	//функция гетер, для передачи текущего оружия в нотифай
 public: class AActor* GetCurrentWeaponInHand() const { return WeaponInHand; }

@@ -1,14 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AnimInstanceCaine/CaineAnimInstance.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ClassCharacter/CharacterCaine.h"
+
 
 void UCaineAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	CaineCharacter = Cast<ACharacter>(TryGetPawnOwner());
+	CaineCharacter = Cast<ACharacterCaine>(TryGetPawnOwner());
+	
+	//float CharacterSprintSpeed = 470.0f;//Тут потом сделать каст на нашу переменную float SprintSpeed из персонажа
 }
 
 void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -17,41 +20,60 @@ void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (!CaineCharacter || !CaineCharacter->GetCharacterMovement()) return;
 
-	UCharacterMovementComponent* MoveComp = CaineCharacter->GetCharacterMovement();
+	DeltaTime = DeltaSeconds;
+	
+	MoveComp = CaineCharacter->GetCharacterMovement();
 
+	//Скорость персонажа
 	SpeedXY = CaineCharacter->GetVelocity().Size2D();
+	//Направление персонажа
+	FVector Velocity = CaineCharacter->GetVelocity();
+	FRotator ActorRotation = CaineCharacter->GetActorRotation();
+	DirectionXY = CalculateDirection(Velocity, ActorRotation);
+	//Булевая переменная в аним инстансе, которая означает, что в руке есть оружие (для переключения в боевую походку)
+	bHasWeapon = (CaineCharacter->GetCurrentWeaponInHand() != nullptr);
+	
 	bIsFalling = MoveComp->IsFalling();
 
+	IdleAfterRun();
+
+
+}
+
+	
+	
+
+void UCaineAnimInstance::IdleAfterRun()
+{
 	float CurrentAcceleration = MoveComp->GetCurrentAcceleration().Size2D();
-	float CharacterSprintSpeed = 470.0f;
 
 	if (SpeedXY >= CharacterSprintSpeed - 10.0f)
 	{
 		bWasSprintingLastFrame = true;
 
-		
+
 		SprintResetDelayTimer = 0.70f;
 	}
 	else if (SpeedXY < CharacterSprintSpeed - 10.0f && CurrentAcceleration > 0.0f)
 	{
-		
+
 		bCanIdleAfterRun = false;
-		
+
 		if (bWasSprintingLastFrame)
 		{
-			SprintResetDelayTimer -= DeltaSeconds;
+			SprintResetDelayTimer -= DeltaTime;
 
-			
+
 			if (SprintResetDelayTimer <= 0.0f)
 			{
-				
+
 				bWasSprintingLastFrame = false;
 			}
 		}
-		
+
 	}
 
-	
+
 	if (SpeedXY <= 1.0f && bWasSprintingLastFrame)
 	{
 		bCanIdleAfterRun = true;
@@ -60,13 +82,14 @@ void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bWasSprintingLastFrame = false;
 	}
 
-	
+
 	if (bCanIdleAfterRun)
 	{
-		IdleAfterRunTimer -= DeltaSeconds;
+		IdleAfterRunTimer -= DeltaTime;
 		if (IdleAfterRunTimer <= 0.0f)
 		{
 			bCanIdleAfterRun = false;
 		}
 	}
 }
+
