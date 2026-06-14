@@ -23,16 +23,6 @@ class COMBATANDAIBOTCPP_API IInterface_Character_Weapon
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
-	void FlyToHand(USkeletalMeshComponent* MeshCaine);
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
-	void DropWeapon(USkeletalMeshComponent* MeshCaine);
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
-	void DetachWeapon();
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
-	void CLearWeaponInHand_Drop();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void Attack();
@@ -43,8 +33,22 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void ResetIsAttaking();
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void SetbHasWeapon(bool SetbHasWeapon);
+
 	
 	//----------------INTERACT-----------------------------------------------------------------------------------------------------------------------
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void FlyToHand(USkeletalMeshComponent* MeshCaine);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void DropWeapon(USkeletalMeshComponent* MeshCaine);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void DetachWeapon();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void CLearWeaponInHand_Drop();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void PlayMontagesSword_Sheathe(USkeletalMeshComponent* MeshCaine);

@@ -73,6 +73,8 @@ protected: //Функции из интерфейса Interface_Character_Weapon
 	virtual void CLearWeaponInHand_Drop_Implementation() override;
 	//Функция для обновления переменных AActor* WeaponInHand; AActor* EquippedWeaponInHips;
 	virtual void SwapWeaponSlots_Implementation() override;
+	//Функция для обновления переменной bHasWeapon (значения приходят из оружия)
+	virtual void SetbHasWeapon_Implementation(bool SetbHasWeapon) override;
 
 //Переменные для изменения скорости
 protected: 
@@ -110,12 +112,21 @@ protected:
 	//Функция, переключает режим персонажа с не боевгого в боевой
 	UFUNCTION()
 	void SwitcherCharacterMode();
+	//Булевая переменная, означает что в руках есть оружие,  (нужна для переключения режимов ходьбы)
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Settings")
+	bool bHasWeapon;
 
 	//функция гетер, для передачи текущего оружия в нотифай
 public: class AActor* GetCurrentWeaponInHand() const { return WeaponInHand; }
 	//функция гетер, для передачи текущего оружия на поясе в нотифай
 public: class AActor* GetCurrentEquippedWeaponInHips() const { return EquippedWeaponInHips; }
-
+	//Функция гетер, для передачи значения SprintSpeed
+public: float GetSprintSpeed() const { return SprintSpeed; }
+	  //Функция гетер, для передачи значения bHasWeapon
+public: bool GetbHasWeapon() const { return bHasWeapon; }
+	
+	
 	  //Массив инвентарь
 	  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Settings")
 	  TArray<AActor*> WeaponInventory;

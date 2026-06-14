@@ -11,8 +11,8 @@ void UCaineAnimInstance::NativeInitializeAnimation()
 
 	CaineCharacter = Cast<ACharacterCaine>(TryGetPawnOwner());
 	
-	//float CharacterSprintSpeed = 470.0f;//Тут потом сделать каст на нашу переменную float SprintSpeed из персонажа
 }
+
 
 void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -24,6 +24,8 @@ void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	
 	MoveComp = CaineCharacter->GetCharacterMovement();
 
+	//Получаем доступ к текущей скорости спринта
+	CharacterSprintSpeed = CaineCharacter ? CaineCharacter->GetSprintSpeed() : 0.f;
 	//Скорость персонажа
 	SpeedXY = CaineCharacter->GetVelocity().Size2D();
 	//Направление персонажа
@@ -31,7 +33,7 @@ void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	FRotator ActorRotation = CaineCharacter->GetActorRotation();
 	DirectionXY = CalculateDirection(Velocity, ActorRotation);
 	//Булевая переменная в аним инстансе, которая означает, что в руке есть оружие (для переключения в боевую походку)
-	bHasWeapon = (CaineCharacter->GetCurrentWeaponInHand() != nullptr);
+	bWeaponInHand = (CaineCharacter->GetbHasWeapon() != false);
 	
 	bIsFalling = MoveComp->IsFalling();
 
@@ -92,4 +94,9 @@ void UCaineAnimInstance::IdleAfterRun()
 		}
 	}
 }
+
+//void UCaineAnimInstance::SetbHasWeapon_Implementation(bool SwitchbHasWeapon)
+//{
+//	bHasWeapon = SwitchbHasWeapon;
+//}
 

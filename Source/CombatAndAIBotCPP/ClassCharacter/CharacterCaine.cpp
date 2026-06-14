@@ -273,6 +273,7 @@ void ACharacterCaine::SwapWeaponSlots_Implementation()
 }
 
 
+
 void ACharacterCaine::SwitcherCharacterMode()
 {
 	float CurrentSpeedXY = GetVelocity().Size2D();
@@ -300,6 +301,11 @@ void ACharacterCaine::SwitcherCharacterMode()
 		bUseControllerRotationYaw = false;
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
+}
+
+void ACharacterCaine::SetbHasWeapon_Implementation(bool SetbHasWeapon)
+{
+	bHasWeapon = SetbHasWeapon;
 }
 
 //-------------------OVERLAPS------------------------------------------------------------------------------------------------------------------------

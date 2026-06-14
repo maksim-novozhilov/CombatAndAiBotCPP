@@ -106,6 +106,8 @@ void AClassWeaponBase::FlyWeaponTick()
 
 		GetWorldTimerManager().ClearTimer(FlyWeaponTimerHandle);//Выключаем таймер
 
+		IInterface_Character_Weapon::Execute_SetbHasWeapon(GetCharacterMesh->GetOwner(), true);
+
 		CurrentFlySpeed = 0.f;// обнуляем переменную скорости при защелкивании, что бы она не накаплмвалась
 
 	}
@@ -136,6 +138,8 @@ void AClassWeaponBase::DetachWeapon_Implementation()
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	this->DetachFromActor(DetachRules);
 
+	IInterface_Character_Weapon::Execute_SetbHasWeapon(GetCharacterMesh->GetOwner(), false);
+	
 	if (WeaponMesh)
 	{
 		
@@ -209,6 +213,7 @@ void AClassWeaponBase::AttachWeaponToHips_Implementation()
 		FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
 		this->AttachToComponent(GetCharacterMesh, AttachRules, HipsSocketSword);
 
+		IInterface_Character_Weapon::Execute_SetbHasWeapon(GetCharacterMesh->GetOwner(), false);
 		
 		GetCharacterMesh = nullptr;
 
@@ -225,6 +230,7 @@ void AClassWeaponBase::DetachWeaponToHips_Implementation()
 		FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
 		this->AttachToComponent(GetCharacterMesh, AttachRules, HandSocketSword);
 
+		IInterface_Character_Weapon::Execute_SetbHasWeapon(GetCharacterMesh->GetOwner(), true);
 
 	}
 }

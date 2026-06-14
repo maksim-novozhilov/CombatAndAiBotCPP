@@ -19,6 +19,8 @@ void UPickUpAndDropWeaponAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UA
 
 				IInterface_Character_Weapon::Execute_DetachWeapon(GetWeapon);//отщелкивает оружие от сокета руки
 				IInterface_Character_Weapon::Execute_CLearWeaponInHand_Drop(Character);//обнуляет переменную ActorInHand в персонаже
+				
+
 			}
 		}
 	}
