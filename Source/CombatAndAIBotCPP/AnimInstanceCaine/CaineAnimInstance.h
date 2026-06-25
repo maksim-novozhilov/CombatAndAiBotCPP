@@ -26,6 +26,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SpeedXY")
 	float SpeedXY;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SpeedXY")
+	float SpeedXYCombatWalking;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SpeedXY")
 	float DirectionXY;
@@ -50,8 +53,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Timer Idle After Run")
 	float TimeForIdleAfterRun = 4.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "bCanIdleAfterRun")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "bWeaponInHand")
 	bool bWeaponInHand;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "bIsAttaking")
+	bool bIsAttaking;
 
 private:
 
@@ -68,5 +74,8 @@ private:
 	class UCharacterMovementComponent* MoveComp;
 
 	float DeltaTime;
+
+private:
+	FVector SmoothedVelocity = FVector::ZeroVector;
 	
 };

@@ -26,14 +26,38 @@ void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	//Получаем доступ к текущей скорости спринта
 	CharacterSprintSpeed = CaineCharacter ? CaineCharacter->GetSprintSpeed() : 0.f;
-	//Скорость персонажа
+	
+	
+	//OLD (Направление персонажа для блендспейса)
+	/*//Скорость персонажа
 	SpeedXY = CaineCharacter->GetVelocity().Size2D();
 	//Направление персонажа
 	FVector Velocity = CaineCharacter->GetVelocity();
 	FRotator ActorRotation = CaineCharacter->GetActorRotation();
-	DirectionXY = CalculateDirection(Velocity, ActorRotation);
+	DirectionXY = CalculateDirection(Velocity, ActorRotation);*/
+
+	// Направление персонажа для блендспейса (сглаженное)
+	
+	FVector Velocity = CaineCharacter->GetVelocity();
+	SmoothedVelocity = FMath::VInterpTo(SmoothedVelocity, Velocity, DeltaSeconds, 9.0f);
+	
+	SpeedXYCombatWalking = SmoothedVelocity.Size2D();
+	SpeedXY = CaineCharacter->GetVelocity().Size2D();
+	
+	FRotator ActorRotation = CaineCharacter->GetActorRotation();
+	DirectionXY = CalculateDirection(SmoothedVelocity, ActorRotation);
+
+	
+
+	
+
+	
+	
+	
 	//Булевая переменная в аним инстансе, которая означает, что в руке есть оружие (для переключения в боевую походку)
 	bWeaponInHand = (CaineCharacter->GetbHasWeapon() != false);
+	//Булевая переменная в аним инстансе, которая означает, персонаж сейчас атакует
+	bIsAttaking = (CaineCharacter->GetbCharIsAttacingn() != false);
 	
 	bIsFalling = MoveComp->IsFalling();
 

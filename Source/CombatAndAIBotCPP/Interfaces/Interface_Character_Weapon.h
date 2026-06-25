@@ -36,6 +36,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void SetbHasWeapon(bool SetbHasWeapon);
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void SetCharIsAttacing(bool SwitchSetCharIsAttacing);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void BlokingAttack(bool SwitchbIsBlokingAttack);
+
 	
 	//----------------INTERACT-----------------------------------------------------------------------------------------------------------------------
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")

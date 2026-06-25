@@ -244,11 +244,13 @@ void AClassWeaponBase::Attack_Implementation()
 	{
 		UAnimInstance* AnimInstance = GetCharacterMesh->GetAnimInstance();
 
-		if (!bIsAttaking)
+		if (!bIsAttaking && !bIsBlokingAttack)
 		{
 
 			bIsAttaking = true;
 			AttackIndex = 0;
+
+			IInterface_Character_Weapon::Execute_SetCharIsAttacing(GetCharacterMesh->GetOwner(), true);
 
 			AnimInstance->Montage_Play(AttackMontages[AttackIndex], 1.f);
 
@@ -281,9 +283,16 @@ void AClassWeaponBase::CanNextAttack_Implementation(bool bSwitchCanNextAttack)
 	bCanNextAttack = bSwitchCanNextAttack;
 }
 
+void AClassWeaponBase::BlokingAttack_Implementation(bool SwitchbIsBlokingAttack)
+{
+	bIsBlokingAttack = SwitchbIsBlokingAttack;
+}
+
 void AClassWeaponBase::ResetIsAttaking_Implementation()
 {
 	bIsAttaking = false;
+
+	IInterface_Character_Weapon::Execute_SetCharIsAttacing(GetCharacterMesh->GetOwner(), false);
 
 	AttackIndex = 0;
 }

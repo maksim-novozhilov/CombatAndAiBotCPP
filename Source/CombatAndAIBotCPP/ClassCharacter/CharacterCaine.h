@@ -75,15 +75,32 @@ protected: //Функции из интерфейса Interface_Character_Weapon
 	virtual void SwapWeaponSlots_Implementation() override;
 	//Функция для обновления переменной bHasWeapon (значения приходят из оружия)
 	virtual void SetbHasWeapon_Implementation(bool SetbHasWeapon) override;
+	//функция означает, что персонаж атакует
+	virtual void SetCharIsAttacing_Implementation(bool SwitchSetCharIsAttacing) override;
 
-//Переменные для изменения скорости
+protected: //Монтажи для кувырков
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = " Character Settings_Montages")
+	class UAnimMontage* Montage_RollForward;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = " Character Settings_Montages")
+	class UAnimMontage* Montage_RollBack;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = " Character Settings_Montages")
+	class UAnimMontage* Montage_RollLeft;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = " Character Settings_Montages")
+	class UAnimMontage* Montage_RollRight;
+
+	//Переменные для изменения скорости
 protected: 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Character Settings")
 	float DefaultSpeed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Character Settings")
 	float SprintSpeed;
-
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Character Settings")
+	float CombatWalkingSpeed;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Character Settings")
+	float CombatSprintSpeed;
 
 	bool bIsSprinting = false;
 
@@ -111,11 +128,16 @@ protected:
 	AActor* EquippedWeaponInHips;
 	//Функция, переключает режим персонажа с не боевгого в боевой
 	UFUNCTION()
-	void SwitcherCharacterMode();
+	void SwitcherCharacterCameraModeAndSpeed();
 	//Булевая переменная, означает что в руках есть оружие,  (нужна для переключения режимов ходьбы)
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Settings")
 	bool bHasWeapon;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Settings")
+	bool bCharIsAttacing;
+	//Функция, которая на wasd направляет персонажа во время атаки
+	UFUNCTION()
+	void UpdateRotateDirection(float DeltaTime);
 
 	//функция гетер, для передачи текущего оружия в нотифай
 public: class AActor* GetCurrentWeaponInHand() const { return WeaponInHand; }
@@ -125,11 +147,18 @@ public: class AActor* GetCurrentEquippedWeaponInHips() const { return EquippedWe
 public: float GetSprintSpeed() const { return SprintSpeed; }
 	  //Функция гетер, для передачи значения bHasWeapon
 public: bool GetbHasWeapon() const { return bHasWeapon; }
-	
+	  //Функция гетер, для передачи значения CharIsAttacing
+public: bool GetbCharIsAttacingn() const { return bCharIsAttacing; }
 	
 	  //Массив инвентарь
 	  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Settings")
 	  TArray<AActor*> WeaponInventory;
+
+
+	
+
+
+
 
 	
 

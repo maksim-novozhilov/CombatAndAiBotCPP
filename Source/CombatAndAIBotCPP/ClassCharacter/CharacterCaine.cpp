@@ -6,6 +6,8 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Animation/AnimMontage.h"
+
 
 // Sets default values
 ACharacterCaine::ACharacterCaine()
@@ -37,7 +39,7 @@ void ACharacterCaine::BeginPlay()
 	//Создаем 4 пустые ячейки в инвенторе
 	WeaponInventory.Init(nullptr, 4);
 
-	SwitcherCharacterMode();
+	SwitcherCharacterCameraModeAndSpeed();
 }
 
 // Called every frame
@@ -45,7 +47,11 @@ void ACharacterCaine::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	SwitcherCharacterMode();
+	//SwitcherCharacterMode();
+
+	UpdateRotateDirection(DeltaTime);
+
+	
 
 }
 
@@ -136,6 +142,8 @@ void ACharacterCaine::MoveRight(const FInputActionValue & Value)
 
 		
 		AddMovementInput(RightDirection, MovementValue);
+
+		
 	}
 
 	
@@ -174,19 +182,113 @@ void ACharacterCaine::LookUp(const FInputActionValue & Value)
 void ACharacterCaine::SprintStart()
 {
 	bIsSprinting = true;
-	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	
+
+	SwitcherCharacterCameraModeAndSpeed();
 }
 
 void ACharacterCaine::SprintStop()
 {
 	bIsSprinting = false;
-	GetCharacterMovement()->MaxWalkSpeed = DefaultSpeed;
+	
+
+	SwitcherCharacterCameraModeAndSpeed();
 }
+
 
 void ACharacterCaine::Roll()
 {
+	if (UAnimInstance* AnimInst = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr)
+	{
+		UAnimMontage* CurrentMontage = AnimInst->GetCurrentActiveMontage();
+		if (CurrentMontage && (CurrentMontage == Montage_RollForward || CurrentMontage == Montage_RollBack || CurrentMontage == Montage_RollLeft || CurrentMontage == Montage_RollRight))
+		{
+			return;
+		}
+	}
+	
+	if (WeaponInHand)
+	{
+		FVector InputVector = GetLastMovementInputVector(); 
 
+		if (InputVector.IsNearlyZero())
+		{
+			if (Montage_RollBack) PlayAnimMontage(Montage_RollBack);
+			return;
+		}
+
+		
+		FVector ForwardVector = FVector::ForwardVector;
+		FVector RightVector = FVector::RightVector;
+
+		if (AController* SelectedController = GetController())
+		{
+			// Берем вращение контроллера (куда смотрит камера)
+			FRotator ControlRot = SelectedController->GetControlRotation();
+			// Обнуляем наклон вверх/вниз, оставляем только поворот влево/вправо
+			FRotator YawRotation(0.0f, ControlRot.Yaw, 0.0f);
+
+			// Получаем чистые векторы Вперед и Вправо относительно КЛЮЧЕВОГО направления боя
+			ForwardVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			RightVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		}
+		
+		float ForwardDot = FVector::DotProduct(InputVector.GetSafeNormal(), ForwardVector);
+		float RightDot = FVector::DotProduct(InputVector.GetSafeNormal(), RightVector);
+
+		//ПО ДИАГОНАЛИ Комбинация клавиш WA WD
+		if (ForwardDot > 0.3f && FMath::Abs(RightDot) > 0.3f)
+		{
+			if (RightDot > 0.f)
+			{
+				if (Montage_RollRight) PlayAnimMontage(Montage_RollRight);
+			}
+			else
+			{
+				if (Montage_RollLeft) PlayAnimMontage(Montage_RollLeft);
+			}
+		}
+		//ПО ДИАГОНАЛИ Комбинация клавиш SA SD
+		else if (ForwardDot < -0.3f && FMath::Abs(RightDot) > 0.3f)
+		{
+			if (RightDot > 0.f)
+			{
+				if (Montage_RollRight) PlayAnimMontage(Montage_RollRight);
+			}
+			else
+			{
+				if (Montage_RollLeft) PlayAnimMontage(Montage_RollLeft);
+			}
+		}
+		//ПРЯМЫЕ НАПРАВЛЕНИЯ W A S D
+		else
+		{
+			if (FMath::Abs(ForwardDot) >= FMath::Abs(RightDot))
+			{
+				if (ForwardDot > 0.f)
+				{
+					if (Montage_RollForward) PlayAnimMontage(Montage_RollForward);
+				}
+				else
+				{
+					if (Montage_RollBack) PlayAnimMontage(Montage_RollBack);
+				}
+			}
+			else
+			{
+				if (RightDot > 0.f)
+				{
+					if (Montage_RollRight) PlayAnimMontage(Montage_RollRight);
+				}
+				else
+				{
+					if (Montage_RollLeft) PlayAnimMontage(Montage_RollLeft);
+				}
+			}
+		}
+	}
 }
+
 
 void ACharacterCaine::LBM()
 {
@@ -210,7 +312,7 @@ void ACharacterCaine::Interact()
 
 		IInterface_Character_Weapon::Execute_FlyToHand(WeaponInHand, GetMesh());
 		
-		SwitcherCharacterMode();
+		SwitcherCharacterCameraModeAndSpeed();
 	}
 
 	else if (!DetectedActor && WeaponInHand)
@@ -218,7 +320,7 @@ void ACharacterCaine::Interact()
 		
 		IInterface_Character_Weapon::Execute_DropWeapon(WeaponInHand, GetMesh());
 		
-		//SwitcherCharacterMode();
+		
 	}
 }
 		
@@ -228,7 +330,7 @@ void ACharacterCaine::CLearWeaponInHand_Drop_Implementation()
 {
 	WeaponInHand = nullptr;
 
-	SwitcherCharacterMode();
+	SwitcherCharacterCameraModeAndSpeed();
 
 }
 
@@ -269,45 +371,122 @@ void ACharacterCaine::SwapWeaponSlots_Implementation()
 		EquippedWeaponInHips = nullptr;
 	}
 
-	SwitcherCharacterMode();
+	SwitcherCharacterCameraModeAndSpeed();
 }
 
 
 
-void ACharacterCaine::SwitcherCharacterMode()
+void ACharacterCaine::SwitcherCharacterCameraModeAndSpeed()
 {
 	float CurrentSpeedXY = GetVelocity().Size2D();
 	
-	if (WeaponInHand && CurrentSpeedXY >= 10.f && CurrentSpeedXY < (SprintSpeed-10.f))
+	if (bCharIsAttacing) return;
+
+	if (WeaponInHand)
 	{
+		GetCharacterMovement()->MaxWalkSpeed = CombatWalkingSpeed;
+	}
+
+	if (WeaponInHand && bIsSprinting)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = CombatSprintSpeed;
+	}
+	
+	if (WeaponInHand)
+	{
+		// Если оружие в руках: всегда привязаны к повороту камеры (контроллера)
 		bUseControllerRotationYaw = true;
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 	}
+	else
+	{
+		// Если оружия нет: персонаж свободно крутится в сторону бега
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
 
-	else if (WeaponInHand && CurrentSpeedXY < 10.f)
-	{
-		bUseControllerRotationYaw = false;
-		GetCharacterMovement()->bOrientRotationToMovement = true;
+		// Возвращаем дефолтные скорости для режима без оружия
+		GetCharacterMovement()->MaxWalkSpeed = DefaultSpeed;
+
+		if (bIsSprinting)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		}
 	}
 	
-	else if (WeaponInHand && CurrentSpeedXY >= (SprintSpeed-10.f))
-	{
-		bUseControllerRotationYaw = false;
-		GetCharacterMovement()->bOrientRotationToMovement = true;
-	}
-	
-	else if (!WeaponInHand)
-	{
-		bUseControllerRotationYaw = false;
-		GetCharacterMovement()->bOrientRotationToMovement = true;
-	}
+
 }
+
+
+	
+
 
 void ACharacterCaine::SetbHasWeapon_Implementation(bool SetbHasWeapon)
 {
 	bHasWeapon = SetbHasWeapon;
 }
 
+void ACharacterCaine::SetCharIsAttacing_Implementation(bool SwitchSetCharIsAttacing)
+{
+	bCharIsAttacing = SwitchSetCharIsAttacing;
+
+	if (bCharIsAttacing)
+	{
+		// Выключаем вращение за камерой на время удара
+		bUseControllerRotationYaw = false;
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+		}
+	}
+
+	else
+	{
+		SwitcherCharacterCameraModeAndSpeed();
+	}
+}
+
+void ACharacterCaine::UpdateRotateDirection(float DeltaTime)
+{
+	if (bCharIsAttacing && Controller)
+	{
+		float ForwardInput = 0.0f;
+		float RightInput = 0.0f;
+
+		// Напрямую опрашиваем контроллер на нажатие клавиш WASD
+		if (APlayerController* PC = Cast<APlayerController>(Controller))
+		{
+			if (PC->IsInputKeyDown(EKeys::W)) ForwardInput += 1.0f;
+			if (PC->IsInputKeyDown(EKeys::S)) ForwardInput -= 1.0f;
+			if (PC->IsInputKeyDown(EKeys::D)) RightInput += 1.0f;
+			if (PC->IsInputKeyDown(EKeys::A)) RightInput -= 1.0f;
+		}
+
+		// Если игрок зажал хотя бы одну клавишу WASD во время удара
+		if (ForwardInput != 0.0f || RightInput != 0.0f)
+		{
+			// Рассчитываем вектор направления относительно вашей камеры (как в ваших функциях)
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+			const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+			// Собираем финальный вектор желаемого направления
+			FVector DesiredDirection = (ForwardDirection * ForwardInput) + (RightDirection * RightInput);
+			DesiredDirection.Normalize();
+
+			// Превращаем вектор в угол поворота (сбрасываем Pitch и Roll, чтобы персонаж не наклонялся)
+			FRotator TargetRotation = DesiredDirection.Rotation();
+			TargetRotation.Pitch = 0.0f;
+			TargetRotation.Roll = 0.0f;
+
+			// Плавно разворачиваем капсулу персонажа (15.0f — скорость поворота)
+			FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, 15.0f);
+			SetActorRotation(NewRotation);
+		}
+
+	}
+}
 //-------------------OVERLAPS------------------------------------------------------------------------------------------------------------------------
 void ACharacterCaine::OnWeaponOverlapStart(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

@@ -63,11 +63,12 @@ protected:
 	virtual void DetachWeaponToHips_Implementation() override;//функция, которая открепляет меч от пояса
 	virtual void Attack_Implementation() override;//Функция атаки лкм
 	virtual void CanNextAttack_Implementation(bool bSwitchCanNextAttack) override;//Функция, которая разрешает запустить некст атаку
-	virtual void ResetIsAttaking_Implementation() override;//Функция сбрасывает переменную bIsAttaking, если игрок не успел нажать слудующий удар
+	virtual void ResetIsAttaking_Implementation() override;//Функция, которая сбрасывает переменную IsAttaking
+	virtual void BlokingAttack_Implementation(bool SwitchbIsBlokingAttack) override;//Функция, которая запрещает или разрешает атаку
 
 protected:
 
-	//Сюда сохраняем меш персонажа (для полета оружия в сокет на руке или для вызова аним инстанс)
+	//Сюда сохраняем меш персонажа (для полета оружия в сокет на руке или для вызова аним инстанс), обнуляем переменную во воремя выбрасывания и прятанья оружия
 	UPROPERTY(BlueprintReadOnly, Category = "WeaponSetings")
 	class USkeletalMeshComponent* GetCharacterMesh;
 	
@@ -104,6 +105,9 @@ protected:
 	//Переменная, сбрасывает тикущий индекс, если индекс атаки больше длинны массива (настраивается в бп оружия)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponSetings")
 	int ResetAttackIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponSetings")
+	bool bIsBlokingAttack;
 
 
 	
