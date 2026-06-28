@@ -51,6 +51,8 @@ void ACharacterCaine::Tick(float DeltaTime)
 
 	UpdateRotateDirection(DeltaTime);
 
+	CurrentSpeedXY = GetVelocity().Size2D();
+
 	
 
 }
@@ -99,6 +101,10 @@ void ACharacterCaine::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 		//LBM
 		EnhancedInputComponent->BindAction(IA_LBM, ETriggerEvent::Started, this, &ACharacterCaine::LBM);
+		
+		//RBM
+		EnhancedInputComponent->BindAction(IA_RBM, ETriggerEvent::Started, this, &ACharacterCaine::BlockStart);
+		EnhancedInputComponent->BindAction(IA_RBM, ETriggerEvent::Completed, this, &ACharacterCaine::BlockStop);
 	}
 }
 
@@ -181,9 +187,9 @@ void ACharacterCaine::LookUp(const FInputActionValue & Value)
 
 void ACharacterCaine::SprintStart()
 {
+	
 	bIsSprinting = true;
 	
-
 	SwitcherCharacterCameraModeAndSpeed();
 }
 
@@ -292,16 +298,64 @@ void ACharacterCaine::Roll()
 
 void ACharacterCaine::LBM()
 {
-	if (WeaponInHand)
+	if (WeaponInHand && !bIsSprinting)
 	{
 		IInterface_Character_Weapon::Execute_Attack(WeaponInHand);
 	}
+
+	if (WeaponInHand && bIsSprinting)
+	{
+		FVector InputVector = GetLastMovementInputVector();
+		FVector ForwardVector = FVector::ForwardVector;
+		FVector RightVector = FVector::RightVector;
+
+		if (AController* SelectedController = GetController())
+		{
+			// Берем вращение контроллера (куда смотрит камера)
+			FRotator ControlRot = SelectedController->GetControlRotation();
+			// Обнуляем наклон вверх/вниз, оставляем только поворот влево/вправо
+			FRotator YawRotation(0.0f, ControlRot.Yaw, 0.0f);
+
+			// Получаем чистые векторы Вперед и Вправо относительно КЛЮЧЕВОГО направления боя
+			ForwardVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			RightVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		}
+
+		float ForwardDot = FVector::DotProduct(InputVector.GetSafeNormal(), ForwardVector);
+		float RightDot = FVector::DotProduct(InputVector.GetSafeNormal(), RightVector);
+
+		if (ForwardDot > 0.8)
+		{
+			IInterface_Character_Weapon::Execute_SprintAttack(WeaponInHand);
+						
+		}
+	}
+			
 
 	else if (!WeaponInHand && EquippedWeaponInHips)
 	{
 		Sheathe_Unsheathe();
 	}
 }
+
+void ACharacterCaine::BlockStart()
+{
+	if (WeaponInHand)
+	{
+		bCharIsBlocking = true;
+
+		SwitcherCharacterCameraModeAndSpeed();
+	}
+}
+
+void ACharacterCaine::BlockStop()
+{
+	bCharIsBlocking = false;
+
+	SwitcherCharacterCameraModeAndSpeed();
+}
+
+
 
 void ACharacterCaine::Interact()
 {
@@ -378,7 +432,7 @@ void ACharacterCaine::SwapWeaponSlots_Implementation()
 
 void ACharacterCaine::SwitcherCharacterCameraModeAndSpeed()
 {
-	float CurrentSpeedXY = GetVelocity().Size2D();
+	
 	
 	if (bCharIsAttacing) return;
 
@@ -387,7 +441,7 @@ void ACharacterCaine::SwitcherCharacterCameraModeAndSpeed()
 		GetCharacterMovement()->MaxWalkSpeed = CombatWalkingSpeed;
 	}
 
-	if (WeaponInHand && bIsSprinting)
+	if (WeaponInHand && bIsSprinting && !bCharIsBlocking)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = CombatSprintSpeed;
 	}
@@ -398,6 +452,8 @@ void ACharacterCaine::SwitcherCharacterCameraModeAndSpeed()
 		bUseControllerRotationYaw = true;
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 	}
+
+	
 	else
 	{
 		// Если оружия нет: персонаж свободно крутится в сторону бега
@@ -418,6 +474,18 @@ void ACharacterCaine::SwitcherCharacterCameraModeAndSpeed()
 
 
 	
+void ACharacterCaine::SetMovementMode_Implementation(bool bSwitMovementhMode)
+{
+	if (bSwitMovementhMode)
+	{
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+	}
+
+	if (!bSwitMovementhMode)
+	{
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	}
+}
 
 
 void ACharacterCaine::SetbHasWeapon_Implementation(bool SetbHasWeapon)
@@ -444,6 +512,7 @@ void ACharacterCaine::SetCharIsAttacing_Implementation(bool SwitchSetCharIsAttac
 		SwitcherCharacterCameraModeAndSpeed();
 	}
 }
+
 
 void ACharacterCaine::UpdateRotateDirection(float DeltaTime)
 {

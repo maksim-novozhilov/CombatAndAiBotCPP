@@ -58,7 +58,10 @@ void UCaineAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bWeaponInHand = (CaineCharacter->GetbHasWeapon() != false);
 	//Булевая переменная в аним инстансе, которая означает, персонаж сейчас атакует
 	bIsAttaking = (CaineCharacter->GetbCharIsAttacingn() != false);
-	
+	//Булевая переменная в аним инстансе, которая означает, персонаж в блоке
+	bIsBlocking = (CaineCharacter->GetbCharIsBlocking() != false);
+
+
 	bIsFalling = MoveComp->IsFalling();
 
 	IdleAfterRun();

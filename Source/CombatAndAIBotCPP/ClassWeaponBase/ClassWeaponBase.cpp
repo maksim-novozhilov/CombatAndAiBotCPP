@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimInstance.h"
+#include "TimerManager.h"
 
 // Sets default values
 AClassWeaponBase::AClassWeaponBase()
@@ -24,7 +25,14 @@ AClassWeaponBase::AClassWeaponBase()
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
 	CollisionSphere->SetupAttachment(WeaponMesh);
 
+	ValueTimerSprintAttack = 10.f;
+
 }
+
+
+
+
+
 
 
 
@@ -240,10 +248,11 @@ void AClassWeaponBase::DetachWeaponToHips_Implementation()
 
 void AClassWeaponBase::Attack_Implementation()
 {
+	
 	if (GetCharacterMesh)
 	{
 		UAnimInstance* AnimInstance = GetCharacterMesh->GetAnimInstance();
-
+						
 		if (!bIsAttaking && !bIsBlokingAttack)
 		{
 
@@ -278,6 +287,40 @@ void AClassWeaponBase::Attack_Implementation()
 }
 
 
+void AClassWeaponBase::SprintAttack_Implementation()
+{
+	
+	if (bCanNextSprintAttack)
+	{
+
+		ResetIsAttaking_Implementation();
+
+		if (GetCharacterMesh)
+		{
+			UAnimInstance* AnimInstance = GetCharacterMesh->GetAnimInstance();
+			UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
+
+			if (CurrentMontage != SprintAttack)
+			{
+				AnimInstance->Montage_Play(SprintAttack, 1.f);
+			}
+
+			bCanNextSprintAttack = false;
+
+			GetWorld()->GetTimerManager().SetTimer(TimerNextAttack, this, &AClassWeaponBase::ResetSprintAttack, ValueTimerSprintAttack, false);
+		}
+	}
+}
+
+
+
+
+void AClassWeaponBase::ResetSprintAttack()
+{
+	bCanNextSprintAttack = true;
+}
+
+
 void AClassWeaponBase::CanNextAttack_Implementation(bool bSwitchCanNextAttack)
 {
 	bCanNextAttack = bSwitchCanNextAttack;
@@ -287,6 +330,7 @@ void AClassWeaponBase::BlokingAttack_Implementation(bool SwitchbIsBlokingAttack)
 {
 	bIsBlokingAttack = SwitchbIsBlokingAttack;
 }
+
 
 void AClassWeaponBase::ResetIsAttaking_Implementation()
 {

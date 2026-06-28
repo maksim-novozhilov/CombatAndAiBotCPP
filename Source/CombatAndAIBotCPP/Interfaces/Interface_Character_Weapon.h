@@ -26,6 +26,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void Attack();
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void SprintAttack();
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
+	void SetMovementMode(bool bSwitMovementhMode);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void CanNextAttack(bool bSwitchCanNextAttack);
@@ -41,6 +47,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void BlokingAttack(bool SwitchbIsBlokingAttack);
+
+	
 
 	
 	//----------------INTERACT-----------------------------------------------------------------------------------------------------------------------

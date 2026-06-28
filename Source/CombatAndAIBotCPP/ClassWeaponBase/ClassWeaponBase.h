@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Animation/AnimMontage.h"
 #include "Interfaces/Interface_Character_Weapon.h"
+
 #include "ClassWeaponBase.generated.h"
 
 UCLASS()
@@ -33,6 +34,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "WeaponSetings")
 	TArray<UAnimMontage*> AttackMontages;
+
+	UPROPERTY(EditDefaultsOnly, Category = "WeaponSetings")
+	UAnimMontage* SprintAttack;
 	
 	//Монтаж взятия оружия (меч)
 	UPROPERTY(EditDefaultsOnly, Category = "WeaponSetings")
@@ -65,6 +69,7 @@ protected:
 	virtual void CanNextAttack_Implementation(bool bSwitchCanNextAttack) override;//Функция, которая разрешает запустить некст атаку
 	virtual void ResetIsAttaking_Implementation() override;//Функция, которая сбрасывает переменную IsAttaking
 	virtual void BlokingAttack_Implementation(bool SwitchbIsBlokingAttack) override;//Функция, которая запрещает или разрешает атаку
+	virtual void SprintAttack_Implementation() override;//Функция для спринт атаки
 
 protected:
 
@@ -108,6 +113,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponSetings")
 	bool bIsBlokingAttack;
+
+	FTimerHandle TimerNextAttack;
+	
+	UFUNCTION()
+	void ResetSprintAttack();
+
+	UPROPERTY()
+	bool bCanNextSprintAttack = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponSetings")
+	float ValueTimerSprintAttack;
 
 
 	

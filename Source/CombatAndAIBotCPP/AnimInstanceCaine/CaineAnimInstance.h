@@ -58,6 +58,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "bIsAttaking")
 	bool bIsAttaking;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "bIsBlocking")
+	bool bIsBlocking;
+
+
 
 private:
 

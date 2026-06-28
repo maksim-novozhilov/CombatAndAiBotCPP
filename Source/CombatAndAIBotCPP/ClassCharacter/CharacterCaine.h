@@ -55,6 +55,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* IA_LBM;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* IA_RBM;
+
 
 	void MoveForward(const struct FInputActionValue& Value);
 	void MoveRight(const struct FInputActionValue& Value);
@@ -66,6 +70,8 @@ public:
 	void Interact();
 	void Sheathe_Unsheathe();
 	void LBM();
+	void BlockStart();
+	void BlockStop();
 
 protected: //Функции из интерфейса Interface_Character_Weapon
 	
@@ -77,6 +83,8 @@ protected: //Функции из интерфейса Interface_Character_Weapon
 	virtual void SetbHasWeapon_Implementation(bool SetbHasWeapon) override;
 	//функция означает, что персонаж атакует
 	virtual void SetCharIsAttacing_Implementation(bool SwitchSetCharIsAttacing) override;
+	//функция перключает мовемент мод в персонаже (например во время спринт атаки)
+	virtual void SetMovementMode_Implementation(bool bSwitMovementhMode) override;
 
 protected: //Монтажи для кувырков
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = " Character Settings_Montages")
@@ -104,9 +112,14 @@ protected:
 
 	bool bIsSprinting = false;
 
+private:
+	//Тукущая скорость
+	UPROPERTY()
+	float CurrentSpeedXY;
 
 
 
+protected:
 //Функции для оверлапа
 	UFUNCTION()
 	void OnWeaponOverlapStart(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -135,6 +148,8 @@ protected:
 	bool bHasWeapon;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Settings")
 	bool bCharIsAttacing;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Character Settings")
+	bool bCharIsBlocking = false;
 	//Функция, которая на wasd направляет персонажа во время атаки
 	UFUNCTION()
 	void UpdateRotateDirection(float DeltaTime);
@@ -149,6 +164,9 @@ public: float GetSprintSpeed() const { return SprintSpeed; }
 public: bool GetbHasWeapon() const { return bHasWeapon; }
 	  //Функция гетер, для передачи значения CharIsAttacing
 public: bool GetbCharIsAttacingn() const { return bCharIsAttacing; }
+	  //Функция гетер, для передачи значения bCharIsBlocking
+public: bool GetbCharIsBlocking() const { return bCharIsBlocking; }
+
 	
 	  //Массив инвентарь
 	  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Settings")
